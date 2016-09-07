@@ -1,0 +1,38 @@
+{
+  "name": "node-sheets",
+  "version": "0.1.0",
+  "description": "Utility Wrapper for Google Spreadsheets",
+  "author": "Carlos Guedes <carlos@urbancups.com> (http://cupsapp.com)",
+  "scripts": {
+    "compile": "babel -d lib/ src/",
+    "prepublish": "npm run compile",
+    "dev": "nodemon -e js -w src/ -x 'babel-node src/index.js'",
+    "test": "npm run compile && mocha --compilers js:babel-core/register --slow 5000",
+    "test:watch": "npm test -- -w"
+  },
+  "main": "lib/index.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/urbancups/node-sheets.git"
+  },
+  "dependencies": {
+    "babel-runtime": "^6.11.6",
+    "google-auth-library": "^0.9.8",
+    "googleapis": "^12.4.0",
+    "q": "^1.4.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.14.0",
+    "babel-core": "^6.13.2",
+    "babel-loader": "^6.2.5",
+    "babel-plugin-react-transform": "^2.0.2",
+    "babel-plugin-transform-runtime": "^6.12.0",
+    "babel-polyfill": "^6.3.14",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-react": "^6.3.13",
+    "babel-preset-stage-0": "^6.5.0",
+    "babel-register": "^6.11.6",
+    "mocha": "^3.0.2"
+  }
+}
