@@ -66,6 +66,10 @@ For now, node-sheets offers two authentication mechanisms.
 
  1. With APIKEY (`.authorizeApiKey(apikey)`) using an API Key you have created in the [google developers console](https://console.developers.google.com).
 
+## Other API Methods
+
+- `Sheets.getLastUpdateDate()`: Returns a ISO_8601 compatible string with the last update date of the spreadsheet.
+
 ## Examples
 
 You can check the `/test/index.js` file for examples.

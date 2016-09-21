@@ -44,6 +44,21 @@ export default class Sheets {
     this.auth = apikey
   }
 
+  /**
+   * Returns the last update date of the spreadsheet.
+   * Date is returned as a string in RFC 3339 date-time format. Example: 1985-04-12T23:20:50.52Z
+   * This date-time format is parsable by Date constructor in Javascript and momentjs library.
+   */
+  async getLastUpdateDate () {
+    var drive = google.drive('v3')
+    const response = await Q.ninvoke(drive.files, "get", {
+      auth: this.auth,
+      fileId: this.spreadsheetId,
+      fields: 'modifiedTime'
+    })
+    const res = response[0]
+    return res.modifiedTime
+  }
 
   /**
    * Returns a spreadsheet range in tabular cols format.

@@ -54,6 +54,17 @@ describe('Sheets', function () {
 
   })
 
+  describe('#getLastUpdateDate', () => {
+    it('should return a valid date string', async () => { // ex: 2016-09-21T15:37:15.250Z
+      const gs = new Sheets(SPREADSHEET_TEST_ID)
+      await gs.authorizeApiKey(SPREADSHEET_API_KEY)
+      const updateDate = await gs.getLastUpdateDate()
+      assert.notEqual(updateDate, null)
+      const date = new Date(updateDate)
+      assert.equal(date.constructor, Date)
+    })
+  })
+
   describe('#table (Formats!A1:E3)', () => {
     const gs = new Sheets(SPREADSHEET_TEST_ID)
     before(async () => {
