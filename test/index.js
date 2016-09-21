@@ -1,5 +1,5 @@
 import assert from 'assert'
-import Sheets from './../src'
+import Sheets from './../src/sheets'
 import util from 'util'
 
 const SPREADSHEET_TEST_ID = '1amfst1WVcQDntGe6walYt-4O5SCrHBD5WntbjhvfIm4'
