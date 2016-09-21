@@ -136,13 +136,15 @@ function effectiveValue (value) {
   if (value.effectiveFormat.numberFormat) {
     switch (value.effectiveFormat.numberFormat.type) {
       case 'TEXT':
-        return value.effectiveValue.stringValue
+        return value.effectiveValue && value.effectiveValue.stringValue ? value.effectiveValue.stringValue : ''
       case 'NUMBER':
-        return value.effectiveValue.numberValue
+        return value.effectiveValue && value.effectiveValue.numberValue ? value.effectiveValue.numberValue : 0
       case 'CURRENCY':
-        return value.effectiveValue.numberValue
+        return value.effectiveValue && value.effectiveValue.numberValue ? value.effectiveValue.numberValue : 0
       case 'DATE':  // 'serial number' format
-        return ExcelDateToJSDate(value.effectiveValue.numberValue)
+        return value.effectiveValue && value.effectiveValue.numberValue
+          ? ExcelDateToJSDate(value.effectiveValue.numberValue)
+          : new Date()
     }
   }
 
