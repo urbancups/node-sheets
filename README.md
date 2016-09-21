@@ -21,10 +21,11 @@ Example to retrieve data from [this google spreadsheet](https://docs.google.com/
 
 ```javascript
 try {
+  import Sheets from 'node-sheets'
   const gs = new Sheets('1amfst1WVcQDntGe6walYt-4O5SCrHBD5WntbjhvfIm4')
   const authData = require('someGoogleCredentials.json') // authData = { client_email, private_key }
   await gs.authorizeJWT(authData)
-  const table = gs.table('Formats!A1:E3')
+  const table = await gs.table('Formats!A1:E3')
   console.log(table.headers)
   console.log(table.formats)
   console.log(table.rows)
@@ -36,6 +37,7 @@ try {
 You can also use the lib with Promises.
 
 ```javascript
+import Sheets from 'node-sheets'
 const gs = new Sheets('1amfst1WVcQDntGe6walYt-4O5SCrHBD5WntbjhvfIm4')
 const authData = require('someGoogleCredentials.json') // authData = { client_email, private_key }
 gs.authorizeJWT(authData)
@@ -49,6 +51,13 @@ gs.authorizeJWT(authData)
     console.error(err)
   })
 ```
+
+If you want to use this with `require` you need to import the `default`:
+
+```javascript
+const Sheets = require('node-sheets').default
+```
+
 
 ## Authentication
 

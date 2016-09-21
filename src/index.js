@@ -1,2 +1,1 @@
-import Sheets from './sheets'
-module.exports = Sheets
+export default from './sheets'

@@ -1,6 +1,6 @@
 {
   "name": "node-sheets",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Utility Wrapper for Google Spreadsheets",
   "author": "Carlos Guedes <carlos@urbancups.com> (http://cupsapp.com)",
   "scripts": {
@@ -16,6 +16,12 @@
     "type": "git",
     "url": "https://github.com/urbancups/node-sheets.git"
   },
+  "directories": [
+    "src",
+    "cred",
+    "test",
+    "lib"
+  ],
   "dependencies": {
     "babel-runtime": "^6.11.6",
     "google-auth-library": "^0.9.8",
