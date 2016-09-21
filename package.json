@@ -4,7 +4,6 @@
   "description": "Utility Wrapper for Google Spreadsheets",
   "author": "Carlos Guedes <carlos@urbancups.com> (http://cupsapp.com)",
   "scripts": {
-    "precompile": "ls -la ./node_modules/.bin",
     "compile": "babel -d lib/ src/",
     "prepublish": "npm run compile",
     "dev": "nodemon -e js -w src/ -x 'babel-node src/index.js'",
