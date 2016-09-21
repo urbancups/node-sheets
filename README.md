@@ -20,8 +20,8 @@ $ npm install node-sheets --save
 Example to retrieve data from [this google spreadsheet](https://docs.google.com/spreadsheets/d/1amfst1WVcQDntGe6walYt-4O5SCrHBD5WntbjhvfIm4) using ES7 async/await.
 
 ```javascript
+import Sheets from 'node-sheets'
 try {
-  import Sheets from 'node-sheets'
   const gs = new Sheets('1amfst1WVcQDntGe6walYt-4O5SCrHBD5WntbjhvfIm4')
   const authData = require('someGoogleCredentials.json') // authData = { client_email, private_key }
   await gs.authorizeJWT(authData)
@@ -29,7 +29,7 @@ try {
   console.log(table.headers)
   console.log(table.formats)
   console.log(table.rows)
-} catch(err) {
+} catch (err) {
   console.error(err)
 }
 ```
