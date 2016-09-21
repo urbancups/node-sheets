@@ -1,10 +1,10 @@
 # node-sheets
 
-[ ![Codeship Status for urbancups/cups-dashboard](https://codeship.com/projects/40de6c70-5cac-0134-517f-066f4b004e09/status?branch=master)](https://codeship.com/projects/173746)
+> Read rows from google spreadsheet with google's sheets api.
 
-Read rows from google spreadsheet with google's sheets api.
+[![Build Status](https://travis-ci.org/urbancups/node-sheets.svg?branch=master)](https://travis-ci.org/urbancups/node-sheets)
 
-> This library is beta so you should use it with care. We will make an effort to support the library, but we reserve the right to make incompatible changes when necessary.
+** This library is beta so you should use it with care. We will make an effort to support the library, but we reserve the right to make incompatible changes when necessary.
 
 ## Instalation
 
