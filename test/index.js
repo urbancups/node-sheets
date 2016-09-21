@@ -1,7 +1,6 @@
 import assert from 'assert'
 import util from 'util'
-// import Sheets from './../src'
-const Sheets = require('./../src').default
+import Sheets from './../src'
 
 const SPREADSHEET_TEST_ID = '1amfst1WVcQDntGe6walYt-4O5SCrHBD5WntbjhvfIm4'
 const SPREADSHEET_JWT_KEY = require('./../cred/node-sheets-test-e9b53a714340.json')

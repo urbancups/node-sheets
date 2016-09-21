@@ -58,7 +58,6 @@ If you want to use this with `require` you need to import the `default`:
 const Sheets = require('node-sheets').default
 ```
 
-
 ## Authentication
 
 For now, node-sheets offers two authentication mechanisms.
