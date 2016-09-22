@@ -70,6 +70,8 @@ For now, node-sheets offers two authentication mechanisms.
 
 - `Sheets.getLastUpdateDate()`: Returns a ISO_8601 compatible string with the last update date of the spreadsheet.
 
+- `Sheets.getSheetsNames()`: Returns a list with all the names of the sheets in the spreadsheet
+
 ## Examples
 
 You can check the `/test/index.js` file for examples.

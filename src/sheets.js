@@ -60,6 +60,17 @@ export default class Sheets {
     return res.modifiedTime
   }
 
+  async getSheetsNames () {
+    var sheets = google.sheets('v4')
+    const response = await Q.ninvoke(sheets.spreadsheets, "get", {
+      auth: this.auth,
+      spreadsheetId: this.spreadsheetId,
+      fields: 'sheets/properties'
+    })
+    const res = response[0].sheets.map(sheet => sheet.properties.title)
+    return res
+  }
+
   /**
    * Returns a spreadsheet range in tabular cols format.
    * The tabular cols format returns the content by cols, and each col contains the values for each row.
