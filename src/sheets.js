@@ -64,7 +64,8 @@ export default class Sheets {
     var sheets = google.sheets('v4')
     const response = await Q.ninvoke(sheets.spreadsheets, "get", {
       auth: this.auth,
-      spreadsheetId: this.spreadsheetId
+      spreadsheetId: this.spreadsheetId,
+      fields: 'sheets/properties'
     })
     const res = response[0].sheets.map(sheet => sheet.properties.title)
     return res
