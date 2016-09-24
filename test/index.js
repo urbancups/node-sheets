@@ -59,7 +59,7 @@ describe('Sheets', function () {
       const gs = new Sheets(SPREADSHEET_TEST_ID)
       await gs.authorizeApiKey(SPREADSHEET_API_KEY)
       const names = await gs.getSheetsNames()
-      assert.deepEqual(names, [ 'Class Data', 'Table with empty cells', 'Formats', 'Empty', 'blue' ])
+      assert.deepEqual(names, [ 'Class Data', 'Table with empty cells', 'Formats', 'Empty', 'blue', 'D001', 'D002' ])
     })
   })
 
@@ -71,6 +71,23 @@ describe('Sheets', function () {
       assert.notEqual(updateDate, null)
       const date = new Date(updateDate)
       assert.equal(date.constructor, Date)
+    })
+  })
+
+  describe("#tables", () => {
+    it('should retrieve all sheets', async () => {
+      const gs = new Sheets(SPREADSHEET_TEST_ID)
+      await gs.authorizeApiKey(SPREADSHEET_API_KEY)
+      const names = await gs.getSheetsNames()
+      const tables = await gs.tables(names.map(name => `${name}!A:ZZZ`))
+      //console.log(util.inspect(tables, { depth: null, colors: true }))
+      assert.equal(tables.length, names.length)
+      assert.deepEqual(tables.map(t => t.title), names)
+
+      // const table = tables[0]
+      // console.log(util.inspect(table.headers, { depth: null, colors: true }))
+      // console.log(util.inspect(table.formats, { depth: null, colors: true }))
+      // console.log(util.inspect(table.rows, { depth: null, colors: true }))
     })
   })
 
@@ -86,8 +103,12 @@ describe('Sheets', function () {
       assert.deepEqual(table.headers, [ 'Automatic', 'Currency', 'Date', 'Number', 'Plain Text' ])
       assert.deepEqual(table.formats.map(f => f.numberFormat.type), [ 'NONE', 'CURRENCY', 'DATE', 'NUMBER', 'TEXT' ])
       assert.equal(table.rows.length, 2)
-      assert.deepEqual(table.rows[0].stringValues, [ 'Oil', '$0.41', '1/25/2016', '123.00', 'This is some text' ])
-      assert.deepEqual(table.rows[0].values, [ 'Oil', .41, new Date(2016, 0, 25), 123, 'This is some text' ])
+      assert.deepEqual(Object.keys(table.rows[0].cols), ['Automatic', 'Currency', 'Date', 'Number', 'Plain Text' ])
+      assert.deepEqual(table.rows[0].cols['Automatic'], { value: 'Oil', stringValue: 'Oil' })
+      assert.deepEqual(table.rows[0].cols['Currency'], { value: 0.41, stringValue: '$0.41' })
+      assert.deepEqual(table.rows[0].cols['Date'], { value: new Date(2016, 0, 25), stringValue: '1/25/2016' })
+      assert.deepEqual(table.rows[0].cols['Number'], { value: 123, stringValue: '123.00' })
+      assert.deepEqual(table.rows[0].cols['Plain Text'], { value: 'This is some text', stringValue: 'This is some text' })
     })
 
     it('should return formatted tabular (tableCols) spreadsheet data', async () => {

@@ -69,8 +69,62 @@ For now, node-sheets offers two authentication mechanisms.
 ## Other API Methods
 
 - `Sheets.getLastUpdateDate()`: Returns a ISO_8601 compatible string with the last update date of the spreadsheet.
+- `Sheets.getSheetsNames()`: Returns a list with all the names of the sheets in the spreadsheet.
+- `Sheets.tables(rangeArray)`: Returns array of #table information for each range specified. Note that you may need to append `!A:ZZZ` to the end of your sheet name, if the name use a syntax compatible with a range (ex: A100). More info [here](http://stackoverflow.com/a/39641586).
 
-- `Sheets.getSheetsNames()`: Returns a list with all the names of the sheets in the spreadsheet
+## Reponse schema for `.table(range)` / `.tables(ranges)`
+
+Returns a spreadsheet range in tabular row format. The tabular row format returns the content by rows, and each row contains the values for each column.
+
+### Sample
+
+| Header 1   | Header 2 | Header 3 |
+| ---------- | -------- | -------- |
+| row 1 text | $0.41    | 3.00     |
+| ...        | ...      | ...      |
+
+```javascript
+const table = await gs.table('Formats')
+
+{
+ title: 'Formats',                                                        // name of the sheet/table
+ headers: ['Header 1', 'Header 2', 'Header 3'],                           // name of the headers (1st row)
+ formats: [                                                               // array with information regarding cell format
+   { numberFormat: { type: 'NONE' } },
+   { numberFormat: { type: 'CURRENCY', pattern: '"$"#,##0.00' } },
+   { numberFormat: { type: 'NUMBER', pattern: '#,##0.00' } } ]
+ rows: [                                                                  // rows contains the values for 2nd row ahead
+   {                                                                      // Each row object has:
+     cols: {                                                                  // cols - map header -> (value | stringValue)
+       'Header 1': { value: 'row 1 text', stringValue: 'row 1 text' },
+       'Header 2': { value: 0.41, stringValue: '$0.41' },
+       'Header 3': { value: 3, stringValue: '3.00' }
+      },
+      values: ['row 1 text', 0.41, 3],                                        // values - array with values for each header
+      stringValue: ['row 1 text', '$0.41', '3.00']                            // stringValue - string representation of the values for each header
+    },
+   { ... },
+   { ... }
+ ]
+}
+```
+
+Sample access to the value of col 'Header 2' of first row:
+
+```javascript
+const currencyValue = table.rows[0].cols['Header 2'].value     // 0.41
+```
+
+It is also possible to get an array with all the (column) values for the row (formatted and string versions):
+
+```javascript
+const rowValues = table.rows[0].values              // [..., ..., ...]
+const rowValues = table.rows[0].stringValues        // ['...', '...', ...]
+```
+
+
+**Note:** Formats are retrieved from first data row.
+
 
 ## Examples
 
