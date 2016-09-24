@@ -3,6 +3,9 @@ import google from 'googleapis'
 import util from 'util'
 import zipObject from 'lodash.zipobject'
 
+const SCOPE_DRIVE_READ = 'https://www.googleapis.com/auth/drive.readonly'
+const SCOPE_SPREADSHEETS_READ = 'https://www.googleapis.com/auth/spreadsheets.readonly'
+
 export default class Sheets {
 
   /**
@@ -23,7 +26,7 @@ export default class Sheets {
    *
    * You can create a key in the [google developers console](https://console.developers.google.com).
    */
-  async authorizeJWT (key, scopes = ['https://www.googleapis.com/auth/spreadsheets.readonly']) {
+  async authorizeJWT (key, scopes = [SCOPE_SPREADSHEETS_READ, SCOPE_DRIVE_READ]) {
     try {
       if (!key) throw new Error('"key" is a required argument')
 
