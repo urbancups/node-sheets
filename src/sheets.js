@@ -1,6 +1,7 @@
 import Q from 'q'
 import google from 'googleapis'
 import util from 'util'
+import zipObject from 'lodash.zipobject'
 
 export default class Sheets {
 
@@ -60,6 +61,9 @@ export default class Sheets {
     return res.modifiedTime
   }
 
+  /**
+   * Returns a list with all the names of the sheets in the spreadsheet.
+   */
   async getSheetsNames () {
     var sheets = google.sheets('v4')
     const response = await Q.ninvoke(sheets.spreadsheets, "get", {
@@ -85,8 +89,7 @@ export default class Sheets {
    * Note: Formats are retrieved from first data row.
    */
   async tableCols (range) {
-    const spreadsheet = await getRange(this.auth, this.spreadsheetId, range)
-
+    const spreadsheet = await getRanges(this.auth, this.spreadsheetId, [range])
     const sheet = spreadsheet.sheets[0] // first (unique) sheet
     const gridData = sheet.data[0]  // first (unique) range
     const headers = gridData.rowData[0].values // first row (headers)
@@ -106,46 +109,96 @@ export default class Sheets {
   }
 
   /**
-   * Returns a spreadsheet range in tabular row format.
+   * Returns spreadsheet ranges in tabular row format.
    * The tabular row format returns the content by rows, and each row contains the values for each column.
    *
+   * | Header 1   | Header 2 | Header 3 |
+   * | ---------- | -------- | -------- |
+   * | row 1 text | $0.41    | 3.00     |
+   * | ...        | ...      | ...      |
+   *
+   *
    * {
-   *  headers: ['Header 1', 'Header 2', 'Header 3'],
-   *  formats: [
+   *  title: 'Formats',                                                        // name of the sheet/table
+   *  headers: ['Header 1', 'Header 2', 'Header 3'],                           // name of the headers (1st row)
+   *  formats: [                                                               // array with information regarding cell format
    *    { numberFormat: { type: 'NONE' } },
    *    { numberFormat: { type: 'CURRENCY', pattern: '"$"#,##0.00' } },
    *    { numberFormat: { type: 'NUMBER', pattern: '#,##0.00' } } ]
-   *  rows: [
-   *    { values: ['some text', 0.41, 3], stringValues: ['some text', '$0.41', '3.00' ] },
-   *    { values: ['some text', 0.41, 3], stringValues: ['some text', '$0.41', '3.00' ] },
-   *    { values: ['some text', 0.41, 3], stringValues: ['some text', '$0.41', '3.00' ] },
-   *    { values: ['some text', 0.41, 3], stringValues: ['some text', '$0.41', '3.00' ] }
+   *  rows: [                                                                  // rows contains the values for 2nd row ahead
+   *    {                                                                      // Each row object has:
+  *        'Header 1': { value: 'row 1 text', stringValue: 'row 1 text' },
+  *        'Header 2': { value: 0.41, stringValue: '$0.41' },
+  *        'Header 3': { value: 3, stringValue: '3.00' }
+   *     },
+   *    { ... },
+   *    { ... }
    *  ]
    * }
    *
+   * Sample access to the value of col 'Header 2' of first row:
+   * ```
+   * const currencyValue = table.rows[0]['Header 2'].value     // 0.41
+   * ```
+   *
    * Note: Formats are retrieved from first data row.
    */
-  async table (range) {
-    const spreadsheet = await getRange(this.auth, this.spreadsheetId, range)
-
-    const sheet = spreadsheet.sheets[0] // first (unique) sheet
-    const gridData = sheet.data[0]  // first (unique) range
-    const headers = gridData.rowData[0].values // first row (headers)
-                            .map(col => formattedValue(col))
-
-    const otherRows = gridData.rowData.slice(1)
-
-    return {
-      headers: headers,
-      formats: otherRows[0].values.map(value => effectiveFormat(value)),
-      rows: otherRows.map(row => ({
-        values: row.values.map(value => effectiveValue(value)),
-        stringValues: row.values.map(value => formattedValue(value))
-      }))
+  async tables (ranges) {
+    let single = false
+    if (typeof ranges === 'string') {
+      // string
+      ranges = [ { name: ranges } ] // NOTE: This version doesn't add range `A:ZZZ`
+      single = true
     }
+    else if (Array.isArray(ranges) === false) {
+      // object
+      ranges = [ { name: ranges.name, range: ranges.range || 'A:ZZZ' } ]
+    }
+    else {
+      // Array
+      ranges = ranges.map(range => ({ name: range.name, range: range.range || 'A:ZZZ' }))
+    }
+
+    // convert ranges to google-sheets ranges
+    ranges = ranges.map(r => `${r.name}${r.range ? `!${r.range}`:''}`)
+
+    const spreadsheets = await getRanges(this.auth, this.spreadsheetId, ranges)
+    const res = spreadsheets.sheets.map(sheetToTable)
+    return single ? res[0] : res
   }
 
+}
 
+
+/**
+ * Converter from google sheet format to node-sheets format
+ */
+function sheetToTable (sheet) {
+  if (sheet.data.length === 0 || sheet.data[0].rowData === undefined) {
+    return {
+      title: sheet.properties.title,
+      headers: [],
+      formats: [],
+      rows: []
+    }
+  }
+  const gridData = sheet.data[0]  // first (unique) range
+  const headers = gridData.rowData[0].values // first row (headers)
+                          .map(col => formattedValue(col))
+
+  const otherRows = gridData.rowData.slice(1)
+
+  const values = otherRows.length > 0 ? otherRows[0].values : new Array(headers.length).fill({})
+
+  return {
+    title: sheet.properties.title,
+    headers: headers,
+    formats: values.map(value => effectiveFormat(value)),
+    rows: otherRows.map(row => zipObject(
+      headers,
+      row.values.map(value => ({ value: effectiveValue(value), stringValue: formattedValue(value)}))
+    ))
+  }
 }
 
 function formattedValue (value) {
@@ -209,10 +262,10 @@ function ExcelDateToJSDate(serial) {
 /**
  * Utility function to get a range from a spreadsheet
  */
-async function getRange (
+async function getRanges (
   auth,
   spreadsheetId,
-  range,
+  ranges,
   fields = 'properties.title,sheets.properties,sheets.data(rowData.values.effectiveValue,rowData.values.formattedValue,rowData.values.effectiveFormat.numberFormat)'
 ) {
   var sheets = google.sheets('v4')
@@ -222,7 +275,7 @@ async function getRange (
     // https://developers.google.com/sheets/guides/concepts, https://developers.google.com/sheets/samples/sheet
     fields: fields,
     includeGridData: true,
-    ranges: [range],
+    ranges: ranges,
   })
   const spreadsheet = response[0]
   return spreadsheet

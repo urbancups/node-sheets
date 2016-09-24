@@ -59,7 +59,7 @@ describe('Sheets', function () {
       const gs = new Sheets(SPREADSHEET_TEST_ID)
       await gs.authorizeApiKey(SPREADSHEET_API_KEY)
       const names = await gs.getSheetsNames()
-      assert.deepEqual(names, [ 'Class Data', 'Table with empty cells', 'Formats', 'Empty', 'blue' ])
+      assert.deepEqual(names, [ 'Class Data', 'Table with empty cells', 'Formats', 'Empty', 'blue', 'D001', 'D002' ])
     })
   })
 
@@ -74,20 +74,41 @@ describe('Sheets', function () {
     })
   })
 
-  describe('#table (Formats!A1:E3)', () => {
+  describe("#tables", () => {
+    it('should retrieve all sheets', async () => {
+      const gs = new Sheets(SPREADSHEET_TEST_ID)
+      await gs.authorizeApiKey(SPREADSHEET_API_KEY)
+      const names = await gs.getSheetsNames()
+      const tables = await gs.tables(names.map(name => ({name: name})))
+      //console.log(util.inspect(tables, { depth: null, colors: true }))
+      assert.equal(tables.length, names.length)
+      assert.deepEqual(tables.map(t => t.title), names)
+
+      // const table = tables[0]
+      // console.log(util.inspect(table.headers, { depth: null, colors: true }))
+      // console.log(util.inspect(table.formats, { depth: null, colors: true }))
+      // console.log(util.inspect(table.rows, { depth: null, colors: true }))
+    })
+  })
+
+  describe('#tables (Formats!A1:E3)', () => {
     const gs = new Sheets(SPREADSHEET_TEST_ID)
     before(async () => {
       await gs.authorizeApiKey(SPREADSHEET_API_KEY)
     })
 
     it('should return formatted tabular spreadsheet data', async () => {
-      const table = await gs.table('Formats!A1:E3')
+      const table = await gs.tables('Formats!A1:E3')
       // console.log(util.inspect(table, { depth: null, colors: true }))
       assert.deepEqual(table.headers, [ 'Automatic', 'Currency', 'Date', 'Number', 'Plain Text' ])
       assert.deepEqual(table.formats.map(f => f.numberFormat.type), [ 'NONE', 'CURRENCY', 'DATE', 'NUMBER', 'TEXT' ])
       assert.equal(table.rows.length, 2)
-      assert.deepEqual(table.rows[0].stringValues, [ 'Oil', '$0.41', '1/25/2016', '123.00', 'This is some text' ])
-      assert.deepEqual(table.rows[0].values, [ 'Oil', .41, new Date(2016, 0, 25), 123, 'This is some text' ])
+      assert.deepEqual(Object.keys(table.rows[0]), ['Automatic', 'Currency', 'Date', 'Number', 'Plain Text' ])
+      assert.deepEqual(table.rows[0]['Automatic'], { value: 'Oil', stringValue: 'Oil' })
+      assert.deepEqual(table.rows[0]['Currency'], { value: 0.41, stringValue: '$0.41' })
+      assert.deepEqual(table.rows[0]['Date'], { value: new Date(2016, 0, 25), stringValue: '1/25/2016' })
+      assert.deepEqual(table.rows[0]['Number'], { value: 123, stringValue: '123.00' })
+      assert.deepEqual(table.rows[0]['Plain Text'], { value: 'This is some text', stringValue: 'This is some text' })
     })
 
     it('should return formatted tabular (tableCols) spreadsheet data', async () => {
@@ -95,7 +116,6 @@ describe('Sheets', function () {
       assert.equal(cols.length, 5)
       assert.deepEqual(cols.map(c => c.header), [ 'Automatic', 'Currency', 'Date', 'Number', 'Plain Text' ])
       assert.equal(cols[0].header, 'Automatic')
-      assert.deepEqual(cols[0].values, ['Oil', 'Grass'])
     })
   })
 
@@ -106,21 +126,28 @@ describe('Sheets', function () {
     })
 
     it('should retrieve only cols and rows with content (8 cols and 2 rows - from "Class Data")', async () => {
-      const table = await gs.table('Class Data')
+      const table = await gs.tables('Class Data')
       assert.equal(table.headers.length, 8)
       assert.equal(table.rows.length, 2)
       // console.log(util.inspect(table, { depth: null, colors: true, breakLength: Infinity }))
     })
 
+    it('should use named range instead of sheet name for special names', async () => {
+      const table = await gs.tables('A02')
+      // console.log(util.inspect(table, { depth: null, colors: true, breakLength: Infinity }))
+      assert.equal(table.rows.length, 0)
+      assert.equal(table.headers.length, 1)
+      assert.equal(table.headers[0], 'Thomas')
+    })
+
     it('should retrieve empty cells as undefined (5 cols and 3 rows - from "Table with empty cells")', async () => {
-      const table = await gs.table('Table with empty cells')
+      const table = await gs.tables('Table with empty cells')
       // console.log(util.inspect(table, { depth: null, colors: true, breakLength: Infinity }))
       assert.equal(table.headers.length, 5)
       assert.equal(table.rows.length, 3)
-      assert.deepEqual(table.rows[1].values, ['Andrew', undefined, '1. Freshman', 'SD', 'Math'])
-      assert.deepEqual(table.rows[2].values, ['Anna', 'Female', undefined, undefined, 'English'])
+      assert.deepEqual(Object.keys(table.rows[1]).map(col => table.rows[1][col].value), ['Andrew', undefined, '1. Freshman', 'SD', 'Math'])
+      assert.deepEqual(Object.keys(table.rows[2]).map(col => table.rows[2][col].value), ['Anna', 'Female', undefined, undefined, 'English'])
     })
-
   })
 
   describe('works with Promises', () => {
@@ -135,7 +162,7 @@ describe('Sheets', function () {
       const gs = new Sheets(SPREADSHEET_TEST_ID)
       const authData = SPREADSHEET_JWT_KEY
       gs.authorizeJWT(authData)
-        .then(() => gs.table('Formats!A1:E3'))
+        .then(() => gs.tables('Formats!A1:E3'))
         .then(table => {
           assert.notEqual(table.headers, null)
           assert.notEqual(table.formats, null)
