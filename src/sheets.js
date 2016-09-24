@@ -109,86 +109,69 @@ export default class Sheets {
   }
 
   /**
-   * Returns a spreadsheet range in tabular row format.
+   * Returns spreadsheet ranges in tabular row format.
    * The tabular row format returns the content by rows, and each row contains the values for each column.
    *
+   * | Header 1   | Header 2 | Header 3 |
+   * | ---------- | -------- | -------- |
+   * | row 1 text | $0.41    | 3.00     |
+   * | ...        | ...      | ...      |
+   *
+   *
    * {
-   *  headers: ['Header 1', 'Header 2', 'Header 3'],
-   *  formats: [
+   *  title: 'Formats',                                                        // name of the sheet/table
+   *  headers: ['Header 1', 'Header 2', 'Header 3'],                           // name of the headers (1st row)
+   *  formats: [                                                               // array with information regarding cell format
    *    { numberFormat: { type: 'NONE' } },
    *    { numberFormat: { type: 'CURRENCY', pattern: '"$"#,##0.00' } },
    *    { numberFormat: { type: 'NUMBER', pattern: '#,##0.00' } } ]
-   *  rows: [
-   *    { values: ['some text', 0.41, 3], stringValues: ['some text', '$0.41', '3.00' ] },
-   *    { values: ['some text', 0.41, 3], stringValues: ['some text', '$0.41', '3.00' ] },
-   *    { values: ['some text', 0.41, 3], stringValues: ['some text', '$0.41', '3.00' ] },
-   *    { values: ['some text', 0.41, 3], stringValues: ['some text', '$0.41', '3.00' ] }
+   *  rows: [                                                                  // rows contains the values for 2nd row ahead
+   *    {                                                                      // Each row object has:
+  *        'Header 1': { value: 'row 1 text', stringValue: 'row 1 text' },
+  *        'Header 2': { value: 0.41, stringValue: '$0.41' },
+  *        'Header 3': { value: 3, stringValue: '3.00' }
+   *     },
+   *    { ... },
+   *    { ... }
    *  ]
    * }
    *
+   * Sample access to the value of col 'Header 2' of first row:
+   * ```
+   * const currencyValue = table.rows[0]['Header 2'].value     // 0.41
+   * ```
+   *
    * Note: Formats are retrieved from first data row.
    */
-  async table (range) {
-    const tables = await this.tables([range])
-    return tables[0]
-  }
-
-  /**
-   * Returns an array with tables with tabular content of the requests ranges.
-   */
   async tables (ranges) {
+    let single = false
+    if (typeof ranges === 'string') {
+      // string
+      ranges = [ { name: ranges } ] // NOTE: This version doesn't add range `A:ZZZ`
+      single = true
+    }
+    else if (Array.isArray(ranges) === false) {
+      // object
+      ranges = [ { name: ranges.name, range: ranges.range || 'A:ZZZ' } ]
+    }
+    else {
+      // Array
+      ranges = ranges.map(range => ({ name: range.name, range: range.range || 'A:ZZZ' }))
+    }
+
+    // convert ranges to google-sheets ranges
+    ranges = ranges.map(r => `${r.name}${r.range ? `!${r.range}`:''}`)
+
     const spreadsheets = await getRanges(this.auth, this.spreadsheetId, ranges)
-    return spreadsheets.sheets.map(sheetToTable)
+    const res = spreadsheets.sheets.map(sheetToTable)
+    return single ? res[0] : res
   }
 
 }
 
 
 /**
- * Returns a spreadsheet range in tabular row format.
- * The tabular row format returns the content by rows, and each row contains the values for each column.
- *
- * | Header 1   | Header 2 | Header 3 |
- * | ---------- | -------- | -------- |
- * | row 1 text | $0.41    | 3.00     |
- * | ...        | ...      | ...      |
- *
- *
- * {
- *  title: 'Formats',                                                        // name of the sheet/table
- *  headers: ['Header 1', 'Header 2', 'Header 3'],                           // name of the headers (1st row)
- *  formats: [                                                               // array with information regarding cell format
- *    { numberFormat: { type: 'NONE' } },
- *    { numberFormat: { type: 'CURRENCY', pattern: '"$"#,##0.00' } },
- *    { numberFormat: { type: 'NUMBER', pattern: '#,##0.00' } } ]
- *  rows: [                                                                  // rows contains the values for 2nd row ahead
- *    {                                                                      // Each row object has:
- *      cols: {                                                                  // cols - map header -> (value | stringValue)
- *        'Header 1': { value: 'row 1 text', stringValue: 'row 1 text' },
- *        'Header 2': { value: 0.41, stringValue: '$0.41' },
- *        'Header 3': { value: 3, stringValue: '3.00' }
- *       },
- *       values: ['row 1 text', 0.41, 3],                                        // values - array with values for each header
- *       stringValue: ['row 1 text', '$0.41', '3.00']                            // stringValue - string representation of the values for each header
- *     },
- *    { ... },
- *    { ... }
- *  ]
- * }
- *
- * Sample access to the value of col 'Header 2' of first row:
- * ```
- * const currencyValue = table.rows[0].cols['Header 2'].value     // 0.41
- * ```
- *
- * It is also possible to get an array with all the (column) values for the row (formatted and string versions):
- * ```
- * const rowValues = table.rows[0].values              // ['row 1 text', 0.41, 3]
- * const rowValues = table.rows[0].stringValues        // ['row 1 text', '$0.41', '3.00']
- * ```
- *
- *
- * Note: Formats are retrieved from first data row.
+ * Converter from google sheet format to node-sheets format
  */
 function sheetToTable (sheet) {
   if (sheet.data.length === 0 || sheet.data[0].rowData === undefined) {
@@ -205,16 +188,16 @@ function sheetToTable (sheet) {
 
   const otherRows = gridData.rowData.slice(1)
 
+  const values = otherRows.length > 0 ? otherRows[0].values : new Array(headers.length).fill({})
+
   return {
     title: sheet.properties.title,
     headers: headers,
-    formats: otherRows[0].values.map(value => effectiveFormat(value)),
-    rows: otherRows.map(row => ({
-      cols: zipObject(headers,
-                      row.values.map(value => ({ value: effectiveValue(value), stringValue: formattedValue(value)}))),
-      values: row.values.map(value => effectiveValue(value)),
-      stringValues: row.values.map(value => formattedValue(value))
-    }))
+    formats: values.map(value => effectiveFormat(value)),
+    rows: otherRows.map(row => zipObject(
+      headers,
+      row.values.map(value => ({ value: effectiveValue(value), stringValue: formattedValue(value)}))
+    ))
   }
 }
 
