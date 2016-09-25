@@ -123,9 +123,9 @@ const currencyValue = table.rows[0]['Header 2'].value     // 0.41
 ```js
 const sheet = await gs.tables('main') // ranges = ['main']
 const sheet = await gs.tables('A100') // ranges = ['A100']  - that is the cell A100 and not the sheet A100
-const sheet = await gs.tables({sheet: 'main'}) // ranges = ['main!A:ZZZ']
-const sheet = await gs.tables({sheet: 'main', range: 'A1:B4'}) // ranges = ['main!A1:B4']
-const sheets = await gs.tables([{sheet: 'main'}, {sheet: 'D001', range: 'A1:D3'}, {sheet: 'D002'}]) // ranges = ['main!A:ZZZ', 'D001!A1:D3', 'D002!A:ZZZ']
+const sheet = await gs.tables({name: 'main'}) // ranges = ['main!A:ZZZ']
+const sheet = await gs.tables({name: 'main', range: 'A1:B4'}) // ranges = ['main!A1:B4']
+const sheets = await gs.tables([{name: 'main'}, {name: 'D001', range: 'A1:D3'}, {name: 'D002'}]) // ranges = ['main!A:ZZZ', 'D001!A1:D3', 'D002!A:ZZZ']
 ```
 
 #### Caveat
