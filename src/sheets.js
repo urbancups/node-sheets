@@ -1,23 +1,23 @@
-import Q from 'q'
-import google from 'googleapis'
-import util from 'util'
-import zipObject from 'lodash.zipobject'
+import Q from 'q';
+import google from 'googleapis';
+import util from 'util';
+import zipObject from 'lodash.zipobject';
 
-const SCOPE_DRIVE_READ = 'https://www.googleapis.com/auth/drive.readonly'
-const SCOPE_SPREADSHEETS_READ = 'https://www.googleapis.com/auth/spreadsheets.readonly'
+const SCOPE_DRIVE_READ = 'https://www.googleapis.com/auth/drive.readonly';
+const SCOPE_SPREADSHEETS_READ =
+  'https://www.googleapis.com/auth/spreadsheets.readonly';
 
 export default class Sheets {
-
   /**
    * Create an instance of Sheets for a given google spreadsheet id
    */
-  constructor (spreadsheetId) {
+  constructor(spreadsheetId) {
     if (spreadsheetId === undefined) {
-      throw new Error('"spreadsheetId" is a required argument')
+      throw new Error('"spreadsheetId" is a required argument');
     }
 
-    this.spreadsheetId = spreadsheetId
-    this.auth = null
+    this.spreadsheetId = spreadsheetId;
+    this.auth = null;
   }
 
   /**
@@ -26,15 +26,23 @@ export default class Sheets {
    *
    * You can create a key in the [google developers console](https://console.developers.google.com).
    */
-  async authorizeJWT (key, scopes = [SCOPE_SPREADSHEETS_READ, SCOPE_DRIVE_READ]) {
+  async authorizeJWT(
+    key,
+    scopes = [SCOPE_SPREADSHEETS_READ, SCOPE_DRIVE_READ]
+  ) {
     try {
-      if (!key) throw new Error('"key" is a required argument')
+      if (!key) throw new Error('"key" is a required argument');
 
-      this.auth = new google.auth.JWT(key.client_email, null, key.private_key, scopes, null)
-      await Q.ninvoke(this.auth, 'authorize')
+      this.auth = new google.auth.JWT(
+        key.client_email,
+        null,
+        key.private_key,
+        scopes,
+        null
+      );
+      await Q.ninvoke(this.auth, 'authorize');
     } catch (err) {
-
-      throw err
+      throw err;
     }
   }
 
@@ -43,9 +51,9 @@ export default class Sheets {
    *
    * You can create a new key in the [google developers console](https://console.developers.google.com).
    */
-  async authorizeApiKey (apikey) {
-    if (!apikey) throw new Error('"apikey" is a required argument')
-    this.auth = apikey
+  async authorizeApiKey(apikey) {
+    if (!apikey) throw new Error('"apikey" is a required argument');
+    this.auth = apikey;
   }
 
   /**
@@ -53,29 +61,29 @@ export default class Sheets {
    * Date is returned as a string in RFC 3339 date-time format. Example: 1985-04-12T23:20:50.52Z
    * This date-time format is parsable by Date constructor in Javascript and momentjs library.
    */
-  async getLastUpdateDate () {
-    var drive = google.drive('v3')
-    const response = await Q.ninvoke(drive.files, "get", {
+  async getLastUpdateDate() {
+    var drive = google.drive('v3');
+    const response = await Q.ninvoke(drive.files, 'get', {
       auth: this.auth,
       fileId: this.spreadsheetId,
       fields: 'modifiedTime'
-    })
-    const res = response[0]
-    return res.modifiedTime
+    });
+    const res = response[0];
+    return res.modifiedTime;
   }
 
   /**
    * Returns a list with all the names of the sheets in the spreadsheet.
    */
-  async getSheetsNames () {
-    var sheets = google.sheets('v4')
-    const response = await Q.ninvoke(sheets.spreadsheets, "get", {
+  async getSheetsNames() {
+    var sheets = google.sheets('v4');
+    const response = await Q.ninvoke(sheets.spreadsheets, 'get', {
       auth: this.auth,
       spreadsheetId: this.spreadsheetId,
       fields: 'sheets/properties'
-    })
-    const res = response[0].sheets.map(sheet => sheet.properties.title)
-    return res
+    });
+    const res = response[0].sheets.map(sheet => sheet.properties.title);
+    return res;
   }
 
   /**
@@ -91,24 +99,21 @@ export default class Sheets {
    *
    * Note: Formats are retrieved from first data row.
    */
-  async tableCols (range) {
-    const spreadsheet = await getRanges(this.auth, this.spreadsheetId, [range])
-    const sheet = spreadsheet.sheets[0] // first (unique) sheet
-    const gridData = sheet.data[0]  // first (unique) range
+  async tableCols(range) {
+    const spreadsheet = await getRanges(this.auth, this.spreadsheetId, [range]);
+    const sheet = spreadsheet.sheets[0]; // first (unique) sheet
+    const gridData = sheet.data[0]; // first (unique) range
     const headers = gridData.rowData[0].values // first row (headers)
-                            .map(col => formattedValue(col))
+      .map(col => formattedValue(col));
 
-    const otherRows = gridData.rowData.slice(1)
+    const otherRows = gridData.rowData.slice(1);
 
-    return headers.map((header, headerIdx) => (
-      {
-        header: header,
-        stringValues: otherRows.map(row => formattedValue(row.values[headerIdx])),
-        values: otherRows.map(row => effectiveValue(row.values[headerIdx])),
-        format: effectiveFormat(otherRows[0].values[headerIdx])  // format of first data line/cell
-      }
-    ))
-
+    return headers.map((header, headerIdx) => ({
+      header: header,
+      stringValues: otherRows.map(row => formattedValue(row.values[headerIdx])),
+      values: otherRows.map(row => effectiveValue(row.values[headerIdx])),
+      format: effectiveFormat(otherRows[0].values[headerIdx]) // format of first data line/cell
+    }));
   }
 
   /**
@@ -130,9 +135,9 @@ export default class Sheets {
    *    { numberFormat: { type: 'NUMBER', pattern: '#,##0.00' } } ]
    *  rows: [                                                                  // rows contains the values for 2nd row ahead
    *    {                                                                      // Each row object has:
-  *        'Header 1': { value: 'row 1 text', stringValue: 'row 1 text' },
-  *        'Header 2': { value: 0.41, stringValue: '$0.41' },
-  *        'Header 3': { value: 3, stringValue: '3.00' }
+   *        'Header 1': { value: 'row 1 text', stringValue: 'row 1 text' },
+   *        'Header 2': { value: 0.41, stringValue: '$0.41' },
+   *        'Header 3': { value: 3, stringValue: '3.00' }
    *     },
    *    { ... },
    *    { ... }
@@ -146,96 +151,111 @@ export default class Sheets {
    *
    * Note: Formats are retrieved from first data row.
    */
-  async tables (ranges) {
-    let single = false
+  async tables(ranges) {
+    let single = false;
     if (typeof ranges === 'string') {
       // string
-      ranges = [ { name: ranges } ] // NOTE: This version doesn't add range `A:ZZZ`
-      single = true
-    }
-    else if (Array.isArray(ranges) === false) {
+      ranges = [{ name: ranges }]; // NOTE: This version doesn't add range `A:ZZZ`
+      single = true;
+    } else if (Array.isArray(ranges) === false) {
       // object
-      ranges = [ { name: ranges.name, range: ranges.range || 'A:ZZZ' } ]
-    }
-    else {
+      ranges = [{ name: ranges.name, range: ranges.range || 'A:ZZZ' }];
+    } else {
       // Array
-      ranges = ranges.map(range => ({ name: range.name, range: range.range || 'A:ZZZ' }))
+      ranges = ranges.map(range => ({
+        name: range.name,
+        range: range.range || 'A:ZZZ'
+      }));
     }
 
     // convert ranges to google-sheets ranges
-    ranges = ranges.map(r => `${r.name}${r.range ? `!${r.range}`:''}`)
+    ranges = ranges.map(r => `${r.name}${r.range ? `!${r.range}` : ''}`);
 
-    const spreadsheets = await getRanges(this.auth, this.spreadsheetId, ranges)
-    const res = spreadsheets.sheets.map(sheetToTable)
-    return single ? res[0] : res
+    const spreadsheets = await getRanges(this.auth, this.spreadsheetId, ranges);
+    const res = spreadsheets.sheets.map(sheetToTable);
+    return single ? res[0] : res;
   }
-
 }
-
 
 /**
  * Converter from google sheet format to node-sheets format
  */
-function sheetToTable (sheet) {
+function sheetToTable(sheet) {
   if (sheet.data.length === 0 || sheet.data[0].rowData === undefined) {
     return {
       title: sheet.properties.title,
       headers: [],
       formats: [],
       rows: []
-    }
+    };
   }
-  const gridData = sheet.data[0]  // first (unique) range
+  const gridData = sheet.data[0]; // first (unique) range
   const headers = gridData.rowData[0].values // first row (headers)
-                          .map(col => formattedValue(col))
+    .map(col => formattedValue(col));
 
-  const otherRows = gridData.rowData.slice(1)
+  const otherRows = gridData.rowData.slice(1);
 
-  const values = otherRows.length > 0 ? otherRows[0].values : new Array(headers.length).fill({})
+  const values =
+    otherRows.length > 0
+      ? otherRows[0].values
+      : new Array(headers.length).fill({});
 
   return {
     title: sheet.properties.title,
     headers: headers,
     formats: values.map(value => effectiveFormat(value)),
-    rows: otherRows.map(row => zipObject(
-      headers,
-      row.values.map(value => ({ value: effectiveValue(value), stringValue: formattedValue(value)}))
-    ))
-  }
+    rows: otherRows.map(row =>
+      zipObject(
+        headers,
+        row.values.map(value => ({
+          value: effectiveValue(value),
+          stringValue: formattedValue(value)
+        }))
+      )
+    )
+  };
 }
 
-function formattedValue (value) {
-  return value ? value.formattedValue : value
+function formattedValue(value) {
+  return value ? value.formattedValue : value;
 }
 
-function effectiveValue (value) {
-  if (!value) return value
+function effectiveValue(value) {
+  if (!value) return value;
 
   if (value.effectiveFormat === null || value.effectiveFormat === undefined) {
-    return value.formattedValue
+    return value.formattedValue;
   }
 
   if (value.effectiveFormat.numberFormat) {
     switch (value.effectiveFormat.numberFormat.type) {
       case 'TEXT':
-        return value.effectiveValue && value.effectiveValue.stringValue ? value.effectiveValue.stringValue : ''
+        return value.effectiveValue && value.effectiveValue.stringValue
+          ? value.effectiveValue.stringValue
+          : '';
       case 'NUMBER':
-        return value.effectiveValue && value.effectiveValue.numberValue ? value.effectiveValue.numberValue : 0
+        return value.effectiveValue && value.effectiveValue.numberValue
+          ? value.effectiveValue.numberValue
+          : 0;
       case 'CURRENCY':
-        return value.effectiveValue && value.effectiveValue.numberValue ? value.effectiveValue.numberValue : 0
-      case 'DATE':  // 'serial number' format
+        return value.effectiveValue && value.effectiveValue.numberValue
+          ? value.effectiveValue.numberValue
+          : 0;
+      case 'DATE': // 'serial number' format
         return value.effectiveValue && value.effectiveValue.numberValue
           ? ExcelDateToJSDate(value.effectiveValue.numberValue)
-          : new Date()
+          : new Date();
     }
   }
 
-  return value.formattedValue
+  return value.formattedValue;
 }
 
-function effectiveFormat (value) {
-  if(value.effectiveFormat) { return value.effectiveFormat }
-  return { numberFormat: { type: 'NONE' } }
+function effectiveFormat(value) {
+  if (value.effectiveFormat) {
+    return value.effectiveFormat;
+  }
+  return { numberFormat: { type: 'NONE' } };
 }
 
 /**
@@ -244,42 +264,49 @@ function effectiveFormat (value) {
  * @param {[type]} serial a date value in "Excel Date Serial" format
  */
 function ExcelDateToJSDate(serial) {
-   var utc_days  = Math.floor(serial - 25569);
-   var utc_value = utc_days * 86400;
-   var date_info = new Date(utc_value * 1000);
+  var utc_days = Math.floor(serial - 25569);
+  var utc_value = utc_days * 86400;
+  var date_info = new Date(utc_value * 1000);
 
-   var fractional_day = serial - Math.floor(serial) + 0.0000001;
+  var fractional_day = serial - Math.floor(serial) + 0.0000001;
 
-   var total_seconds = Math.floor(86400 * fractional_day);
+  var total_seconds = Math.floor(86400 * fractional_day);
 
-   var seconds = total_seconds % 60;
+  var seconds = total_seconds % 60;
 
-   total_seconds -= seconds;
+  total_seconds -= seconds;
 
-   var hours = Math.floor(total_seconds / (60 * 60));
-   var minutes = Math.floor(total_seconds / 60) % 60;
+  var hours = Math.floor(total_seconds / (60 * 60));
+  var minutes = Math.floor(total_seconds / 60) % 60;
 
-   return new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate(), hours, minutes, seconds);
+  return new Date(
+    date_info.getFullYear(),
+    date_info.getMonth(),
+    date_info.getDate(),
+    hours,
+    minutes,
+    seconds
+  );
 }
 
 /**
  * Utility function to get a range from a spreadsheet
  */
-async function getRanges (
+async function getRanges(
   auth,
   spreadsheetId,
   ranges,
   fields = 'properties.title,sheets.properties,sheets.data(rowData.values.effectiveValue,rowData.values.formattedValue,rowData.values.effectiveFormat.numberFormat)'
 ) {
-  var sheets = google.sheets('v4')
-  const response = await Q.ninvoke(sheets.spreadsheets, "get", {
+  var sheets = google.sheets('v4');
+  const response = await Q.ninvoke(sheets.spreadsheets, 'get', {
     auth: auth,
     spreadsheetId: spreadsheetId,
     // https://developers.google.com/sheets/guides/concepts, https://developers.google.com/sheets/samples/sheet
     fields: fields,
     includeGridData: true,
-    ranges: ranges,
-  })
-  const spreadsheet = response[0]
-  return spreadsheet
+    ranges: ranges
+  });
+  const spreadsheet = response[0];
+  return spreadsheet;
 }
