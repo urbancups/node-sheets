@@ -68,7 +68,7 @@ export default class Sheets {
       fileId: this.spreadsheetId,
       fields: 'modifiedTime'
     });
-    const res = response[0];
+    const res = response.data;
     return res.modifiedTime;
   }
 
@@ -82,7 +82,7 @@ export default class Sheets {
       spreadsheetId: this.spreadsheetId,
       fields: 'sheets/properties'
     });
-    const res = response[0].sheets.map(sheet => sheet.properties.title);
+    const res = response.data.sheets.map(sheet => sheet.properties.title);
     return res;
   }
 
@@ -307,6 +307,6 @@ async function getRanges(
     includeGridData: true,
     ranges: ranges
   });
-  const spreadsheet = response[0];
+  const spreadsheet = response.data;
   return spreadsheet;
 }
