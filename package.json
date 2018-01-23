@@ -1,8 +1,8 @@
 {
   "name": "node-sheets",
-  "version": "0.3.1",
+  "version": "1.0.0",
   "description": "Utility Wrapper for Google Spreadsheets",
-  "author": "Carlos Guedes <carlos@urbancups.com> (https://cupsworks.com)",
+  "author": "Carlos Guedes <carlos@cupsworks.com> (https://cupsworks.com)",
   "contributors": [
     "Michael DeRazon"
   ],
