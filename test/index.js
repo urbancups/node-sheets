@@ -3,7 +3,7 @@ import util from 'util';
 import Sheets from './../src';
 
 const SPREADSHEET_TEST_ID = '1amfst1WVcQDntGe6walYt-4O5SCrHBD5WntbjhvfIm4';
-const SPREADSHEET_JWT_KEY = require('./../cred/node-sheets-test-38284ab85b01.json');
+const SPREADSHEET_JWT_KEY = require('./cred/node-sheets-test.json');
 const SPREADSHEET_API_KEY = 'AIzaSyAwwdh_6ktghYF_AgP5pT9EfeiYWVCTr1Q';
 
 describe('Sheets', function() {
