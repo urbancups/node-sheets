@@ -3,13 +3,9 @@
 > Read rows from google spreadsheet with google's sheets api.
 
 [![Build Status](https://travis-ci.org/urbancups/node-sheets.svg?branch=master)](https://travis-ci.org/urbancups/node-sheets)
+[![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 
-** This library is beta so you should use it with care. We will make an effort to support the library, but we reserve the right to make incompatible changes when necessary.
-
-## Instalation
-
-This library is distributed on `npm`. In order to add it as a dependency, run the following command:
-
+## Installation
 
 ```bash
 $ npm install node-sheets --save
@@ -20,42 +16,43 @@ $ npm install node-sheets --save
 Example to retrieve data from [this google spreadsheet](https://docs.google.com/spreadsheets/d/1amfst1WVcQDntGe6walYt-4O5SCrHBD5WntbjhvfIm4) using ES7 async/await.
 
 ```javascript
-import Sheets from 'node-sheets'
+import Sheets from 'node-sheets';
 try {
-  const gs = new Sheets('1amfst1WVcQDntGe6walYt-4O5SCrHBD5WntbjhvfIm4')
-  const authData = require('someGoogleCredentials.json') // authData = { client_email, private_key }
-  await gs.authorizeJWT(authData)
-  const table = await gs.tables('Formats!A1:E3')
-  console.log(table.headers)
-  console.log(table.formats)
-  console.log(table.rows)
+  const gs = new Sheets('1amfst1WVcQDntGe6walYt-4O5SCrHBD5WntbjhvfIm4');
+  const authData = require('someGoogleCredentials.json'); // authData = { client_email, private_key }
+  await gs.authorizeJWT(authData);
+  const table = await gs.tables('Formats!A1:E3');
+  console.log(table.headers);
+  console.log(table.formats);
+  console.log(table.rows);
 } catch (err) {
-  console.error(err)
+  console.error(err);
 }
 ```
 
 You can also use the lib with Promises.
 
 ```javascript
-import Sheets from 'node-sheets'
-const gs = new Sheets('1amfst1WVcQDntGe6walYt-4O5SCrHBD5WntbjhvfIm4')
-const authData = require('someGoogleCredentials.json') // authData = { client_email, private_key }
-gs.authorizeJWT(authData)
+import Sheets from 'node-sheets';
+const gs = new Sheets('1amfst1WVcQDntGe6walYt-4O5SCrHBD5WntbjhvfIm4');
+const authData = require('someGoogleCredentials.json'); // authData = { client_email, private_key }
+gs
+  .authorizeJWT(authData)
   .then(() => gs.tables('Formats!A1:E3'))
   .then(table => {
-    console.log(table.headers)
-    console.log(table.formats)
-    console.log(table.rows)
+    console.log(table.headers);
+    console.log(table.formats);
+    console.log(table.rows);
   })
   .catch(err => {
-    console.error(err)
-  })
+    console.error(err);
+  });
 ```
 
 If you want to use this with `require` you need to import the `default`:
 
 ```javascript
-const Sheets = require('node-sheets').default
+const Sheets = require('node-sheets').default;
 ```
 
 ## API
@@ -66,7 +63,7 @@ Returns tabular sheet data for the specified ranges. This method accepts three d
 
 ### String
 
-If a **string** argument is specified, it defines the name of the range (A1 format) to be retrieved from the spreadsheet.
+If a **string** argument is specified, it defines the name of the range ([A1 notation](https://developers.google.com/sheets/api/guides/concepts#a1_notation)) to be retrieved from the spreadsheet.
 The return model is a `SheetTable` object.
 
 ### Object
@@ -89,7 +86,7 @@ The `.tables()` method returns SheetTable objects that contains tabular data for
 | ...        | ...      | ...      |
 
 ```javascript
-const table = await gs.tables('Formats')
+const table = await gs.tables('Formats');
 
 {
  title: 'Formats',                                                        // name of the sheet/table
@@ -113,7 +110,7 @@ const table = await gs.tables('Formats')
 Sample access to the value of col 'Header 2' of first row:
 
 ```javascript
-const currencyValue = table.rows[0]['Header 2'].value     // 0.41
+const currencyValue = table.rows[0]['Header 2'].value; // 0.41
 ```
 
 **Note:** Formats are retrieved from first data row.
@@ -121,11 +118,11 @@ const currencyValue = table.rows[0]['Header 2'].value     // 0.41
 ### Sample usage
 
 ```js
-const sheet = await gs.tables('main') // ranges = ['main']
-const sheet = await gs.tables('A100') // ranges = ['A100']  - that is the cell A100 and not the sheet A100
-const sheet = await gs.tables({name: 'main'}) // ranges = ['main!A:ZZZ']
-const sheet = await gs.tables({name: 'main', range: 'A1:B4'}) // ranges = ['main!A1:B4']
-const sheets = await gs.tables([{name: 'main'}, {name: 'D001', range: 'A1:D3'}, {name: 'D002'}]) // ranges = ['main!A:ZZZ', 'D001!A1:D3', 'D002!A:ZZZ']
+const sheet = await gs.tables('main'); // ranges = ['main']
+const sheet = await gs.tables('A100'); // ranges = ['A100']  - that is the cell A100 and not the sheet A100
+const sheet = await gs.tables({sheet: 'main'}); // ranges = ['main!A:ZZZ']
+const sheet = await gs.tables({sheet: 'main', range: 'A1:B4'}); // ranges = ['main!A1:B4']
+const sheets = await gs.tables([{sheet: 'main'}, {sheet: 'D001', range: 'A1:D3'}, {sheet: 'D002'}]); // ranges = ['main!A:ZZZ', 'D001!A1:D3', 'D002!A:ZZZ']
 ```
 
 #### Caveat
@@ -135,26 +132,24 @@ More info [here](http://stackoverflow.com/a/39641586).
 
 ## Authentication
 
-For now, node-sheets offers two authentication methods.
+node-sheets offers two authentication methods.
 
- 1. With JWT token (`.authorizeJWT(auth [, scopes])`) using `private_key` and `client_email`, and also allowing to set auth scopes. The default auth scope is https://www.googleapis.com/auth/spreadsheets.readonly.
+1. With JWT token (`.authorizeJWT(auth [, scopes])`) using `private_key` and `client_email`, and also allowing to set auth scopes. The default auth scope is https://www.googleapis.com/auth/spreadsheets.readonly.
 
- 1. With APIKEY (`.authorizeApiKey(apikey)`) using an API Key you have created in the [google developers console](https://console.developers.google.com).
-
+1. With api key (`.authorizeApiKey(apikey)`) using an api key you have created in the [google developers console](https://console.developers.google.com).
 
 ## `Sheets.getLastUpdateDate()`
 
-Returns a ISO_8601 compatible string with the last update date of the spreadsheet.
+Returns a [ISO_8601](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString) compatible string with the last update date of the spreadsheet.
+This can be used to check if a re-fetch is needed.
 
 ## `Sheets.getSheetsNames()`
 
 Returns a list with all the names of the sheets in the spreadsheet.
 
-
 ## Examples
 
 You can check the `/test/index.js` file for examples.
-
 
 ## License
 
