@@ -7,7 +7,7 @@ const SPREADSHEET_JWT_KEY = require('./cred/node-sheets-test.json');
 const SPREADSHEET_API_KEY = 'AIzaSyAwwdh_6ktghYF_AgP5pT9EfeiYWVCTr1Q';
 
 describe('Sheets', function() {
-  this.timeout(10000);
+  this.timeout(20000);
 
   describe('#constructor', function() {
     it('should exist and be a function', () => {
