@@ -7,7 +7,7 @@ const SPREADSHEET_JWT_KEY = require('./cred/node-sheets-test.json');
 const SPREADSHEET_API_KEY = 'AIzaSyAwwdh_6ktghYF_AgP5pT9EfeiYWVCTr1Q';
 
 describe('Sheets', function() {
-  this.timeout(10000);
+  this.timeout(20000);
 
   describe('#constructor', function() {
     it('should exist and be a function', () => {
@@ -208,8 +208,7 @@ describe('Sheets', function() {
   describe('works with Promises', () => {
     it('should throw Error with no args in authorization', () => {
       const gs = new Sheets(SPREADSHEET_TEST_ID);
-      gs
-        .authorizeJWT()
+      gs.authorizeJWT()
         .then(() => assert.fail())
         .catch(err => assert.equal(err.constructor, Error));
     });
@@ -217,8 +216,7 @@ describe('Sheets', function() {
     it('should be able to chain .then() calls, and also .catch()', () => {
       const gs = new Sheets(SPREADSHEET_TEST_ID);
       const authData = SPREADSHEET_JWT_KEY;
-      gs
-        .authorizeJWT(authData)
+      gs.authorizeJWT(authData)
         .then(() => gs.tables('Formats!A1:E3'))
         .then(table => {
           assert.notEqual(table.headers, null);

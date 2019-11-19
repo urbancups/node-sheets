@@ -1,5 +1,5 @@
 import Q from 'q';
-import google from 'googleapis';
+import { google } from 'googleapis';
 import util from 'util';
 import zipObject from 'lodash.zipobject';
 
