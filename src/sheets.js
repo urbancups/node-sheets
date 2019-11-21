@@ -204,15 +204,16 @@ function sheetToTable(sheet) {
     title: sheet.properties.title,
     headers: headers,
     formats: values.map(value => effectiveFormat(value)),
-    rows: otherRows.map(row =>
-      zipObject(
+    rows: otherRows.map(row => {
+        row.values = row.values || [];
+        zipObject(
         headers,
         row.values.map(value => ({
           value: effectiveValue(value),
           stringValue: formattedValue(value)
         }))
       )
-    )
+    })
   };
 }
 
