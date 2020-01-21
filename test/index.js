@@ -92,7 +92,10 @@ describe('Sheets', function() {
       const tables = await gs.tables(names.map(name => ({ name: name })));
       //console.log(util.inspect(tables, { depth: null, colors: true }))
       assert.equal(tables.length, names.length);
-      assert.deepEqual(tables.map(t => t.title), names);
+      assert.deepEqual(
+        tables.map(t => t.title),
+        names
+      );
 
       // const table = tables[0]
       // console.log(util.inspect(table.headers, { depth: null, colors: true }))
@@ -117,13 +120,10 @@ describe('Sheets', function() {
         'Number',
         'Plain Text'
       ]);
-      assert.deepEqual(table.formats.map(f => f.numberFormat.type), [
-        'NONE',
-        'CURRENCY',
-        'DATE',
-        'NUMBER',
-        'TEXT'
-      ]);
+      assert.deepEqual(
+        table.formats.map(f => f.numberFormat.type),
+        ['NONE', 'CURRENCY', 'DATE', 'NUMBER', 'TEXT']
+      );
       assert.equal(table.rows.length, 2);
       assert.deepEqual(Object.keys(table.rows[0]), [
         'Automatic',
@@ -157,13 +157,10 @@ describe('Sheets', function() {
     it('should return formatted tabular (tableCols) spreadsheet data', async () => {
       const cols = await gs.tableCols('Formats!A1:E3');
       assert.equal(cols.length, 5);
-      assert.deepEqual(cols.map(c => c.header), [
-        'Automatic',
-        'Currency',
-        'Date',
-        'Number',
-        'Plain Text'
-      ]);
+      assert.deepEqual(
+        cols.map(c => c.header),
+        ['Automatic', 'Currency', 'Date', 'Number', 'Plain Text']
+      );
       assert.equal(cols[0].header, 'Automatic');
     });
   });

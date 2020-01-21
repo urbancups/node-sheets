@@ -1,6 +1,6 @@
 {
   "name": "node-sheets",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Utility Wrapper for Google Spreadsheets",
   "author": "Carlos Guedes <carlos@cupsworks.com> (https://cupsworks.com)",
   "contributors": [
@@ -22,8 +22,8 @@
     "dev": "nodemon -e js -w src/ -x 'babel-node src/index.js'",
     "test": "npm run test:prettier && npm run compile && mocha --require @babel/register --slow 5000",
     "test:watch": "npm test -- -w",
-    "test:prettier": "prettier --list-different '**/*.{js, md}'",
-    "fix:prettier": "prettier --write '**/*.{js, md}'"
+    "test:prettier": "npx prettier --list-different '**/*.{js, md}'",
+    "fix:prettier": "npx prettier --write '**/*.{js, md}'"
   },
   "main": "lib/index.js",
   "license": "MIT",
@@ -53,6 +53,6 @@
     "mocha": "^6.2.2",
     "nodemon": "^1.19.4",
     "prettier": "^1.18.2",
-    "webpack": "^4.41.2"
+    "webpack": "^4"
   }
 }

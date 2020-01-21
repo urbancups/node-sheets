@@ -207,7 +207,7 @@ function sheetToTable(sheet) {
     rows: otherRows.map(row =>
       zipObject(
         headers,
-        row.values.map(value => ({
+        (row.values || []).map(value => ({
           value: effectiveValue(value),
           stringValue: formattedValue(value)
         }))
