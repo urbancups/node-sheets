@@ -4,7 +4,8 @@
   "description": "Utility Wrapper for Google Spreadsheets",
   "author": "Carlos Guedes <carlos@cupsworks.com> (https://cupsworks.com)",
   "contributors": [
-    "Michael DeRazon"
+    "Michael DeRazon",
+    "Zakir Saifi"
   ],
   "keywords": [
     "google-spreadsheet",
@@ -37,8 +38,8 @@
   ],
   "dependencies": {
     "babel-runtime": "^6.26.0",
-    "google-auth-library": "^5.5.1",
-    "googleapis": "^45.0.0",
+    "google-auth-library": "^6.1.3",
+    "googleapis": "^66.0.0",
     "lodash.zipobject": "^4.1.3",
     "q": "^1.5.1"
   },
