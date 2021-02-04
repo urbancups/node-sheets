@@ -36,15 +36,14 @@ You can also use the lib with Promises.
 import Sheets from 'node-sheets';
 const gs = new Sheets('1amfst1WVcQDntGe6walYt-4O5SCrHBD5WntbjhvfIm4');
 const authData = require('someGoogleCredentials.json'); // authData = { client_email, private_key }
-gs
-  .authorizeJWT(authData)
+gs.authorizeJWT(authData)
   .then(() => gs.tables('Formats!A1:E3'))
-  .then(table => {
+  .then((table) => {
     console.log(table.headers);
     console.log(table.formats);
     console.log(table.rows);
   })
-  .catch(err => {
+  .catch((err) => {
     console.error(err);
   });
 ```
@@ -120,9 +119,13 @@ const currencyValue = table.rows[0]['Header 2'].value; // 0.41
 ```js
 const sheet = await gs.tables('main'); // ranges = ['main']
 const sheet = await gs.tables('A100'); // ranges = ['A100']  - that is the cell A100 and not the sheet A100
-const sheet = await gs.tables({sheet: 'main'}); // ranges = ['main!A:ZZZ']
-const sheet = await gs.tables({sheet: 'main', range: 'A1:B4'}); // ranges = ['main!A1:B4']
-const sheets = await gs.tables([{sheet: 'main'}, {sheet: 'D001', range: 'A1:D3'}, {sheet: 'D002'}]); // ranges = ['main!A:ZZZ', 'D001!A1:D3', 'D002!A:ZZZ']
+const sheet = await gs.tables({ sheet: 'main' }); // ranges = ['main!A:ZZZ']
+const sheet = await gs.tables({ sheet: 'main', range: 'A1:B4' }); // ranges = ['main!A1:B4']
+const sheets = await gs.tables([
+  { sheet: 'main' },
+  { sheet: 'D001', range: 'A1:D3' },
+  { sheet: 'D002' },
+]); // ranges = ['main!A:ZZZ', 'D001!A1:D3', 'D002!A:ZZZ']
 ```
 
 #### Caveat

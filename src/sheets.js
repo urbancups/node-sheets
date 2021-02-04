@@ -66,7 +66,7 @@ export default class Sheets {
     const response = await Q.ninvoke(drive.files, 'get', {
       auth: this.auth,
       fileId: this.spreadsheetId,
-      fields: 'modifiedTime'
+      fields: 'modifiedTime',
     });
     const res = response.data;
     return res.modifiedTime;
@@ -80,9 +80,9 @@ export default class Sheets {
     const response = await Q.ninvoke(sheets.spreadsheets, 'get', {
       auth: this.auth,
       spreadsheetId: this.spreadsheetId,
-      fields: 'sheets/properties'
+      fields: 'sheets/properties',
     });
-    const res = response.data.sheets.map(sheet => sheet.properties.title);
+    const res = response.data.sheets.map((sheet) => sheet.properties.title);
     return res;
   }
 
@@ -104,15 +104,17 @@ export default class Sheets {
     const sheet = spreadsheet.sheets[0]; // first (unique) sheet
     const gridData = sheet.data[0]; // first (unique) range
     const headers = gridData.rowData[0].values // first row (headers)
-      .map(col => formattedValue(col));
+      .map((col) => formattedValue(col));
 
     const otherRows = gridData.rowData.slice(1);
 
     return headers.map((header, headerIdx) => ({
       header: header,
-      stringValues: otherRows.map(row => formattedValue(row.values[headerIdx])),
-      values: otherRows.map(row => effectiveValue(row.values[headerIdx])),
-      format: effectiveFormat(otherRows[0].values[headerIdx]) // format of first data line/cell
+      stringValues: otherRows.map((row) =>
+        formattedValue(row.values[headerIdx])
+      ),
+      values: otherRows.map((row) => effectiveValue(row.values[headerIdx])),
+      format: effectiveFormat(otherRows[0].values[headerIdx]), // format of first data line/cell
     }));
   }
 
@@ -162,14 +164,14 @@ export default class Sheets {
       ranges = [{ name: ranges.name, range: ranges.range || 'A:ZZZ' }];
     } else {
       // Array
-      ranges = ranges.map(range => ({
+      ranges = ranges.map((range) => ({
         name: range.name,
-        range: range.range || 'A:ZZZ'
+        range: range.range || 'A:ZZZ',
       }));
     }
 
     // convert ranges to google-sheets ranges
-    ranges = ranges.map(r => `${r.name}${r.range ? `!${r.range}` : ''}`);
+    ranges = ranges.map((r) => `${r.name}${r.range ? `!${r.range}` : ''}`);
 
     const spreadsheets = await getRanges(this.auth, this.spreadsheetId, ranges);
     const res = spreadsheets.sheets.map(sheetToTable);
@@ -186,12 +188,12 @@ function sheetToTable(sheet) {
       title: sheet.properties.title,
       headers: [],
       formats: [],
-      rows: []
+      rows: [],
     };
   }
   const gridData = sheet.data[0]; // first (unique) range
   const headers = gridData.rowData[0].values // first row (headers)
-    .map(col => formattedValue(col));
+    .map((col) => formattedValue(col));
 
   const otherRows = gridData.rowData.slice(1);
 
@@ -203,16 +205,16 @@ function sheetToTable(sheet) {
   return {
     title: sheet.properties.title,
     headers: headers,
-    formats: values.map(value => effectiveFormat(value)),
-    rows: otherRows.map(row =>
+    formats: values.map((value) => effectiveFormat(value)),
+    rows: otherRows.map((row) =>
       zipObject(
         headers,
-        (row.values || []).map(value => ({
+        (row.values || []).map((value) => ({
           value: effectiveValue(value),
-          stringValue: formattedValue(value)
+          stringValue: formattedValue(value),
         }))
       )
-    )
+    ),
   };
 }
 
@@ -305,7 +307,7 @@ async function getRanges(
     // https://developers.google.com/sheets/guides/concepts, https://developers.google.com/sheets/samples/sheet
     fields: fields,
     includeGridData: true,
-    ranges: ranges
+    ranges: ranges,
   });
   const spreadsheet = response.data;
   return spreadsheet;
