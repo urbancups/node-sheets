@@ -2,13 +2,13 @@
 
 > Read rows from google spreadsheet with google's sheets api.
 
-[![Build Status](https://travis-ci.org/urbancups/node-sheets.svg?branch=master)](https://travis-ci.org/urbancups/node-sheets)
 [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 
 ## Installation
 
 ```bash
 $ npm install node-sheets --save
+$ yarn add node-sheets
 ```
 
 ## Usage

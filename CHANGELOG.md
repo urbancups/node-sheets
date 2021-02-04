@@ -1,6 +1,7 @@
 # 1.2.0
 
 - Merge PR #222 with updated dependencies
+- Remove travis CI and adopt github actions
 
 # 1.1.0
 
